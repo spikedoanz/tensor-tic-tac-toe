@@ -8,9 +8,16 @@ Parallelized and generalized implementation of a 2D TicTacToe win condition veri
 
 ## Spec
 
-n: dimension of board (n,n) 
+N: dimension of board (N,N) 
 
-k: length of line required to win
+K: length of line required to win
+
+## Usage
+
+```bash
+pip install tinygrad
+python tinygrad_ttt.py
+```
 
 ## How this works
 
