@@ -132,7 +132,7 @@ The tensor is then summed, and if it's bigger than 0, a win is found!
 
 --- 
 
-## Text I sent to a friend in a coffee induced god complex at 7am
+## Text I sent to a Claude in a haze at 3am
 
 > just realized i can formulate the win conditions of tictactoe with tensor ops
 
