@@ -1,6 +1,8 @@
 # Tensor Tic Tac Toe
 
-Fully parallel and generalized implementation of a 2D TicTacToe win condition verifier
+Parallelized and generalized implementation of a 2D TicTacToe win condition verifier
+
+![nazuna](dingedit.png)
 
 --- 
 
