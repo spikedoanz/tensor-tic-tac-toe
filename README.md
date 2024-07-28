@@ -8,6 +8,7 @@ Fully parallel implementation of TicTacToe win condition verifier
 
 n: dimension of board (n,n) 
 > ( might do 3d for fun lol ) 
+>
 > ( nd would require fully generalized conv kernel, which i don't have)
 
 k: length of line required to win
