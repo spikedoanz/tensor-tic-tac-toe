@@ -136,6 +136,13 @@ The tensor is then summed, and if it's bigger than 0, a win is found!
 - [ ] Batched to handle multiple boards in one kernel (implicitly already does this, too lazy to fix)
 - [ ] Handle bigger N and K (stuck at ~512 and ~64 right now)
 - [ ] Optimizations, I highly suspect I'm doing more convs than needed
+    - [ ] Repeated horizontal and vertical kernels can be replaced by adding padding
+- [ ] [tinygrad 2dconv](https://docs.tinygrad.org/tensor/ops/?h=conv2d#tinygrad.Tensor.conv2d) supports > 2d convs. hyperdimensional tic-tac-toe?
+    - [ ] replace kernel gen with [kronecker delta](https://en.wikipedia.org/wiki/Kronecker_delta#:~:text=In%20mathematics%2C%20the%20Kronecker%20delta,example%2C%20because%20%2C%20whereas%20because%20.)
+
+---
+
+PRs welcome btw
 
 --- 
 
