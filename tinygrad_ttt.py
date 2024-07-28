@@ -1,9 +1,9 @@
 from tinygrad import Tensor
 import numpy as np
 
-N = 8
-K = 3
-N_BOARDS = 8
+N = 512
+K = 64
+N_BOARDS = 1
 
 def convs(N=N, K=K):
     kernels = []
@@ -38,7 +38,8 @@ def check(boards, kernels, N=N, K=K, specifics=True):
 if __name__ == "__main__":
     print(f"Board size: {(N,N)}")
     print(f"Line length required for win: {K}")
-    boards = Tensor.randint(1, N,N, low=-1, high=2)
-    print(boards.numpy())
-    kernels = convs()
-    print(f"Actual winner: {check(boards, kernels)}")
+    for _ in range(N_BOARDS):
+        boards = Tensor.randint(1, N,N, low=-1, high=2)
+        print(boards.numpy())
+        kernels = convs()
+        print(f"Actual winner: {check(boards, kernels)}")
