@@ -1,32 +1,39 @@
 from tinygrad import Tensor
 
-DIMS = [2,2]
-NDIM = len(DIMS)
+from functools import reduce
+
+DIMS = [2,2,2]
+RANK = len(DIMS)
 K = 2
 
-kernels = []
-# line kernels (can probably turn this into a monstrous single line list comprehension)
-# simplify using flip
-def line_kernel(n, K=K, rank=NDIM): # create a rank NDIMS 
-    padding = tuple([(0,K-1) if i != n else (0,0) for i in range(rank-1,-1,-1)])   # ((pad to K) ... don't pad ... (pad to K))
-    line_shape = [K if i == n else 1 for i in range(rank-1,-1,-1)]                 # (ones ... K ... ones)
-    line = Tensor.ones(K, *[1 for _ in range(n)])                                   # 1s along i'th axis
-    return line.reshape(line_shape).pad(padding)                                    # appply reshape and padding to get to rank NDIMS all Ks
 
-def line_at(n, K=K, rank=NDIM):
-    line = Tensor.ones(K)
-    # pad 0s around N to get to K
-    # pad KxK 0s around KxK to get to rank
-    # flip to some axis
-    return line
+# lines have rank permutations, one for each axis
+# diagonals have rank*(rank-1) permutations, each extra axis creates a new type of diagonal, and each diagonal has rank permutations
+# higher order identities are mutlivectors lmao
 
-# create the identity
-    # create NDIM line tensors x K positions
-    # sum([[reduce(lines_at_same_axis, ==) for lines in all lines_at(n)] for n in range(K)])
-    # => classic i=j=k... identity
-    # NDIM flips to create all variants
+def line(n, axis, rank): return Tensor.rearrange(Tensor.ones(n), f"a -> {' '.join(['1' if i != axis else 'a' for i in range(rank)])}")
+def padded_line(n, axis, rank, shift=0): return line(n, axis,rank).pad([(shift,n-1-shift) if i != axis else (0,0) for i in range(rank)])
+def identity(n, rank):
+    lines = [ [padded_line(n, axis, rank, sft) for axis in range(rank)] for sft in range(n)] # create axis permuted lines at every index
+    dots = [ reduce(lambda a, b: a*b, line) for line in lines] # select out i==j==k==...
+    return reduce(lambda a,b: a+b, dots) # sum up the selected indeces
+    
+
+rank = RANK
+n = K
+lines = [padded_line(n, axis, rank) for axis in range(rank)]
+diags = []
+for axis in range(2,rank+1-1):
+    diag = identity(n, axis)
+    padded= diag.pad( [(0, rank-2) if i > 2 else (0,0) for i in range(rank-axis+2,0,-1)])
+    flips = [diag.flip(i) for i in range(rank-1)]
+    print(flips[1].numpy())
 
 
-# stack all flipped lines and eyes into a single NDIM-conv
-# define board (easy)
-# do the same trick as in 2d tictactpe variant
+
+
+"""
+# tests
+for i in range(1,100):
+    assert (Tensor.ones(i,i).sum() == (Tensor.eye(i) == identity(i, 2)).sum()).numpy(), "{i}x{i} identity not working"
+"""
