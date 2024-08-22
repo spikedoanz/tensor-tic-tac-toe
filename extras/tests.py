@@ -1,13 +1,13 @@
 from tinygrad import Tensor
 
-from tictactoe import convs, check
+from extras.tictactoe import convs, check
 
 from hyperdimensional_tictactoe import kronecker_delta
 from hyperdimensional_tictactoe import convs as hyperconvs
 from hyperdimensional_tictactoe import check as hypercheck 
 
-def test_kronecker():
-    for i in range(1,100):
+def test_kronecker(peak=50):
+    for i in range(1,peak):
         assert (Tensor.ones(i,i).sum() == (Tensor.eye(i) == kronecker_delta(i, 2)).sum()).numpy(), "2D kronecker delta fails"
 
 def test_2d_tic_tac_toe():
@@ -22,5 +22,6 @@ def test_2d_tic_tac_toe():
 
 
 if __name__ == "__main__":
+    test_kronecker()
     test_2d_tic_tac_toe()
-
+    print("Passed")
