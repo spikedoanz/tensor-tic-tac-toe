@@ -3,7 +3,7 @@ from tinygrad import Tensor
 from functools import reduce
 from itertools import combinations
 
-BOARD_DIM = [3,3,3]
+BOARD_DIM = (3,3,3)
 RANK = len(BOARD_DIM)
 K = 3
 
@@ -24,10 +24,9 @@ def kronecker_delta(n:int, rank: int):
 
 def convs(K=K, RANK=RANK):
     kernels = []
-    for local_rank in range(1,RANK+1): # technically adds more kernels than is needed
-        kernel = pad_axes(add_axes(kronecker_delta(K,local_rank), RANK))
-        kernels.append(kernel)
-        flips = [kernel.flip(r) for r in range(local_rank)]
+    for local_rank in range(1,RANK+1):
+        kernels.append(pad_axes(add_axes(kronecker_delta(K,local_rank), RANK)))
+        flips = [kernels[-1].flip(r) for r in range(local_rank)]
         kernels.extend(flips)
         if local_rank != RANK: 
             transpositions = list(combinations(range(RANK), 2))
@@ -39,12 +38,11 @@ def check(board, kernels, specifics=False):
     padded_board = board.pad( [(0, K-1) for _ in board.shape])
     ret = Tensor.rearrange(padded_board, '... -> 1 1 ...').conv2d(kernels)
     one, neg = [Tensor.full(ret.shape, i) for i in (K, -K)]
-    o_wins = (ret == one).sum().item() / (K*2-2)
-    n_wins = (ret == neg).sum().item() / (K*2-2)
+    o_wins, x_wins = [(ret == player).sum().item() / (K*2-2) for player in (one, neg)]
     if specifics:
-        print(f"Positions where one wins: {int(o_wins)}")
-        print(f"Positions where -one wins: {int(n_wins)}")
-    return (o_wins > 0)  - (n_wins > 0)
+        print(f"Positions where 1 wins : {int(o_wins)}")
+        print(f"Positions where -1 wins: {int(x_wins)}")
+    return (o_wins > 0) - (x_wins > 0)
 
 if __name__ == "__main__":
     board = Tensor.randint(*BOARD_DIM, low=-1, high=2)
