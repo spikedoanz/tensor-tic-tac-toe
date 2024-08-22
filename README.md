@@ -115,14 +115,12 @@ Rank 3: Diagonals of a cube
 
 Rank 4: Diagonals of a hypercube
 ```
-RANK = 4
 print(convs(RANK=4)[-1].numpy())
 ```
 
 Rank N: Diagonals of an N-cube
 ```
-RANK = N
-print(convs(RANK=4)[-1].numpy())
+print(convs(RANK=N)[-1].numpy())
 ```
 
 
