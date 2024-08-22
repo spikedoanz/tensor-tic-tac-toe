@@ -19,22 +19,22 @@ def pad_axes(x: Tensor, shift=0):
     shifts = [(shift, max(x.shape)-i-shift) if i < max(x.shape) else (0,0) for i in x.shape]
     return x.pad(shifts)
 
-def axis_vector(n, axis, rank): return add_axes(Tensor.ones(n), rank, axis)
-def padded_line(n, axis, rank, shift=0): return pad_axes(axis_vector(n, axis, rank), shift)
-def identity(n, rank):
-    lines = [ [padded_line(n, axis, rank, idx) for axis in range(rank)] for idx in range(n)] # create axis permuted lines at every index
-    dots = [ reduce(lambda a, b: a*b, line) for line in lines] # select out i==j==k==... for every index
-    return reduce(lambda a,b: a.int()|b.int(), dots) # sum up the selected indeces
-    
+def kronecker_delta(n, rank):
+    def axis_vector(n, axis, rank): return add_axes(Tensor.ones(n), rank, axis)
+    lines = [ [pad_axes(axis_vector(n, axis, rank), idx) for axis in range(rank)] for idx in range(n)] # create axis permuted lines at every index
+    dots = [ reduce(lambda a, b: a*b, line) for line in lines]                                         # select out i==j==k==... for every index
+    return reduce(lambda a,b: a.int()|b.int(), dots)                                                   # sum up the selected indeces
 
-diag = identity(3, 2)
+diag = kronecker_delta(2,2)
+
+added_diag = add_axes(diag, 3,0)
+
+padded_diag = pad_axes(added_diag,0)
+
+
 print(diag.numpy())
-
-
-
-
-
-
+print(added_diag.numpy())
+print(padded_diag.numpy())
 """
 rank = RANK
 n = K
