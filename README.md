@@ -1,16 +1,30 @@
 # Hyperdimensional Tic Tac Toe
 
-(Deprecated) Parallized and generalized implementation of a 2d TicTacToe win condition verfier
+Parallized and fully generalized implementation of a Hyperdimensional TicTacToe win condition verfier
 
-![nazuna](extras/dingedit.png)
+![nazuna](extras/hyperdimensional.gif)
+
+---
+
+
+
+
+
+
+
+
+
 
 
 
 ---
 ---
 ---
+
 
 # Tensor Tic Tac Toe
+
+This is the old readme for extras/tictactoe.py. Saved for reference.
 
 (Deprecated) Parallized and generalized implementation of a 2d TicTacToe win condition verfier
 

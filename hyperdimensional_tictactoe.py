@@ -3,9 +3,9 @@ from tinygrad import Tensor
 from functools import reduce
 from itertools import combinations
 
-BOARD_DIM = (3,3,3)
+BOARD_DIM = (50,50,50,50)
 RANK = len(BOARD_DIM)
-K = 3
+K = 4
 
 def add_axes(x:Tensor, rank:int, shift:int=0):
     """ Adds extra axes around the tensor to turn into rank, shifted by 'shift'.' 
