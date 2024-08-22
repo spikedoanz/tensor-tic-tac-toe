@@ -1,14 +1,41 @@
+# Hyperdimensional Tic Tac Toe
+
+Parallized and fully generalized implementation of a Hyperdimensional TicTacToe win condition verfier
+
+![nazuna](hyperdimensional.png)
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+---
+---
+---
+
+
 # Tensor Tic Tac Toe
 
-Parallelized and generalized implementation of a 2D TicTacToe win condition verifier
+This is the old readme for extras/tictactoe.py. Saved for reference.
 
-![nazuna](dingedit.png)
+(Deprecated) Parallized and generalized implementation of a 2d TicTacToe win condition verfier
+
+![nazuna](extras/dingedit.png)
+
 
 --- 
 
 ## Spec
 
-N: dimension of board (N,N) 
+N: dimension of board 
 
 K: length of line required to win
 
@@ -16,7 +43,7 @@ K: length of line required to win
 
 ```bash
 pip install tinygrad
-python tinygrad_ttt.py
+python extra/tictactoe.py
 ```
 
 ## How this works
