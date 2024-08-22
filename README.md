@@ -2,7 +2,7 @@
 
 Parallized and fully generalized implementation of a Hyperdimensional TicTacToe win condition verfier
 
-![nazuna](extras/hyperdimensional.gif)
+![nazuna](hyperdimensional.png)
 
 ---
 
