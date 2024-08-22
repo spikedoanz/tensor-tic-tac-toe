@@ -1,15 +1,14 @@
 from tinygrad import Tensor
 import numpy as np
 
-BOARD_DIM = [4,3]
-K = 3
+N = 512
+K = 32
 N_BOARDS = 1
 
-def convs(K=K):
+def convs(N=N, K=K):
     kernels = []
-    kernel_dim = tuple([K for _ in BOARD_DIM])
     for _ in range(1,K-1):
-        line = np.zeros(kernel_dim, dtype="int8")
+        line = np.zeros((K,K), dtype="int8")
         line[_, :] = 1
         kernels.append(line.reshape((1,1,K,K)))
         kernels.append(line.T.reshape((1,1,K,K)))
@@ -20,8 +19,8 @@ def convs(K=K):
     win_conv = Tensor(np.stack(kernels, axis=1)).squeeze(dim=0)
     return win_conv
 
-def check(board, kernels,specifics=True):
-    ret = Tensor.rearrange(board.pad2d((1,1,1,1)), '... -> 1 1 ...').conv2d(kernels)
+def check(board, kernels, N=N, K=K, specifics=False):
+    ret = board.pad2d((1,1,1,1)).expand(1,1, 1+N+1 , 1+N+1 ).conv2d(kernels)
     one = Tensor.full(ret.shape, K)
     neg = Tensor.full(ret.shape, -K)
     o_wins = (ret == one).sum().item() / (K*2-2)
@@ -32,11 +31,12 @@ def check(board, kernels,specifics=True):
     return (o_wins > 0)  - (n_wins > 0)
 
 if __name__ == "__main__":
-    print(f"Board size: {BOARD_DIM}")
+    print(f"Board size: {(N,N)}")
     print(f"Line length required for win: {K}")
     for _ in range(N_BOARDS):
-        board = Tensor.randint(*BOARD_DIM, low=-1, high=2)
+        board = Tensor.randint(N,N, low=-1, high=2)
         kernels = convs()
+        print(kernels.shape)
         result = check(board, kernels)
         print(board.numpy())
         print(f"Actual winner: {result}")
