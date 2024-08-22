@@ -1,65 +1,36 @@
-# Hyperdimensional Tic Tac Toe
-
-Parallized and fully generalized implementation of a Hyperdimensional TicTacToe win condition verfier
-
-![nazuna](hyperdimensional.png)
-
----
-
-
-
-
-
-
-
-
-
-
-
-
----
----
----
-
-
 # Tensor Tic Tac Toe
 
-This is the old readme for extras/tictactoe.py. Saved for reference.
+Parallelized and generalized implementation of a hyperdimensional TicTacToe in pure tensor ops
 
-(Deprecated) Parallized and generalized implementation of a 2d TicTacToe win condition verfier
-
-![nazuna](extras/dingedit.png)
-
+![nazuna](dingcube.png)
 
 --- 
 
 ## Spec
 
-N: dimension of board 
+BOARD_DIM: Tuple[int] = Dimensions of the board. Can be N-dimensional (ex: [50,50,50,50,50])
 
-K: length of line required to win
+K: int = Length of line required to win
 
 ## Usage
 
 ```bash
-pip install tinygrad
-python extra/tictactoe.py
+git clone https://github.com/spikedoanz/tensor-tic-tac-toe
+cd tensor-tic-tac-toe
+git clone git@github.com:tinygrad/tinygrad.git tinygrad-nightly
+pip install -e tinygrad-nightly
+python hyperdimensional_tictactoe.py
 ```
 
 ## How this works
 
-Win conditions are factored into 4 types: horizontal, vertical, diagonal and anti-diagonal
+The tic tac toe of shape BOARD_DIM encodes for moves with 1 or -1
 
-Vertical is the transpose (flip also works) of horizontal, and anti-diagonal is the flip of diagonal
+Win conditions of tic tac toe can be encoded by using a convolution.
 
-All of them can be concatenated into a single conv kernel of shape
+The kernel of said convolution lets us select out the positions we like (lines, diagonals, etc)
 
-```
-(n_conditions, 1, k, k) 
-n_conditions (aka channels) := k * 2 - 2
-```
-
-Example: for a 3x3 board, that requires 3 things in a row to win:
+Example: for a (3,3) board, that requires 3 things in a row to win:
 
 ```
 [[[[0 0 0] 
@@ -79,108 +50,79 @@ Example: for a 3x3 board, that requires 3 things in a row to win:
    [1 0 0]]]] # anti-diagonal
 ```
 
-This is fully general!, example: K = 5
-
-```
-[[[[0 0 0 0 0]
-   [1 1 1 1 1]
-   [0 0 0 0 0]
-   [0 0 0 0 0]
-   [0 0 0 0 0]]] # horizontal 1
-
- [[[0 1 0 0 0]
-   [0 1 0 0 0]
-   [0 1 0 0 0]
-   [0 1 0 0 0]
-   [0 1 0 0 0]]] # vertical 1
-
- [[[0 0 0 0 0]
-   [0 0 0 0 0]
-   [1 1 1 1 1]
-   [0 0 0 0 0]
-   [0 0 0 0 0]]] # horizontal 2
-
- [[[0 0 1 0 0]
-   [0 0 1 0 0]
-   [0 0 1 0 0]
-   [0 0 1 0 0]
-   [0 0 1 0 0]]] # vertical 2
-
- [[[0 0 0 0 0]
-   [0 0 0 0 0]
-   [0 0 0 0 0]
-   [1 1 1 1 1]
-   [0 0 0 0 0]]] # horizontal 3
-
- [[[0 0 0 1 0]
-   [0 0 0 1 0]
-   [0 0 0 1 0]
-   [0 0 0 1 0]
-   [0 0 0 1 0]]] # vertical 3
-
- [[[1 0 0 0 0]
-   [0 1 0 0 0]
-   [0 0 1 0 0]
-   [0 0 0 1 0]
-   [0 0 0 0 1]]] # diagonal
-
- [[[0 0 0 0 1]
-   [0 0 0 1 0]
-   [0 0 1 0 0]
-   [0 1 0 0 0]
-   [1 0 0 0 0]]]] # anti-diagonal
-```
-
 The board is then padded to allow the conv to go over the edges of the board
-
 
 Kernels can then be applied as a convolution (basically a bitmap) over the board
 ```
-[0  0  0  0  0]
-[0 -1  1 -1  0]             [0 1 0]     [2  0  1] 
-[0 -1  0  0  0]  .conv2d()  [0 1 0] ->  [3  0  1]
-[0 -1  1  0  0]             [0 1 0]     [2  0  0]
+[1  1 -1  0  0]
+[1  0  0  0  0]             [1 0 0]     [3   2  -1] 
+[1  1  0  0  0]  .conv2d()  [1 0 0] ->  [2   1   0]
+[0  0  0  0  0]             [1 0 0]     [1   1   0]
 [0  0  0  0  0]
 ```
 
 Then, an element wise equality with a tensor full of k or -k is applied to the resultant tensor
 ```
-[2  0  1]      [3  3  3]       [F  F  F]
-[3  0  1]  ==  [3  3  3]  ->   [T  F  F]
-[2  0  0]      [3  3  3]       [F  F  F]
+[3   2  -1]      [3  3  3]       [T  F  F]
+[2   1   0]  ==  [3  3  3]  ->   [F  F  F]
+[1   1   0]      [3  3  3]       [F  F  F]
 ```
 
 The tensor is then summed, and if it's bigger than 0, a win is found! 
 ```
-[F  F  F]
-[T  F  F]  .sum()  -> 1 > 0 ==> Win!!!
+[T  F  F]
+[F  F  F]  .sum()  -> 1 > 0 ==> Win!!!
 [F  F  F]
 ```
 
----
-## Todo
+Win conditions are fully generalized thanks to the [kronecker delta](https://en.wikipedia.org/wiki/Kronecker_delta), which is a tensor with 1s only where i=j=k=...
+```
+def kronecker_delta(n:int, rank:int):
+    def axis_vector(n, axis, rank): return add_axes(Tensor.ones(n), rank, axis) # creates a row or column or ... vector of ones (line)
+    lines = [ [pad_axes(axis_vector(n, axis, rank), idx) for axis in range(rank)] for idx in range(n)] # create axis permuted lines at every index
+    dots = [ reduce(lambda a, b: a*b, line) for line in lines]                                         # select out i==j==k==... for every index
+    return reduce(lambda a,b: a.int()|b.int(), dots)                                                   # sum up the selected indeces
+```
 
-- [ ] Batched to handle multiple boards in one kernel (implicitly already does this, too lazy to fix)
-- [ ] Handle bigger N and K (stuck at ~512 and ~64 right now)
-- [ ] Optimizations, I highly suspect I'm doing more convs than needed
-    - [ ] Repeated horizontal and vertical kernels can be replaced by adding padding
-- [ ] [tinygrad 2dconv](https://docs.tinygrad.org/tensor/ops/?h=conv2d#tinygrad.Tensor.conv2d) supports > 2d convs. hyperdimensional tic-tac-toe?
-    - [ ] replace kernel gen with [kronecker delta](https://en.wikipedia.org/wiki/Kronecker_delta#:~:text=In%20mathematics%2C%20the%20Kronecker%20delta,example%2C%20because%20%2C%20whereas%20because%20.)
 
----
+Each rank has its own type of win condition:
 
-PRs welcome btw
+Rank 1: Lines
 
---- 
+```
+            [1 1 1]
+```
 
-## Text I sent to a Claude in a haze at 3am
+Rank 2: Diagonals of a square
+```
+[
+            [1 0 0]
+            [0 1 0]
+            [0 0 1]
+]
+```
 
-> just realized i can formulate the win conditions of tictactoe with tensor ops
 
-> the kernels are the horizontal and verticals of 1..n-1 indexes filled out with 1
->   plus identity and flipped identity for the diagonals
-> so a board of size n and line win condition k can be verified in parallel as a
-> conv, pad 1, stride 1
-> with a (k,n,n) kernel (k-2 for horizontal/vertical, 2 for diagonals)
+Rank 3: Diagonals of a cube
+```
+[
+    [
+              [[1 0 0]      [[0 0 0]      [[0 0 0]
+               [0 0 0]       [0 1 0]       [0 0 0]
+               [0 0 0]]      [0 0 0]       [0 0 1]]
+    ]
+]
+```
 
-> kernels are then pooled, then checked for occurrences of k. (maybe with a flattened tensor of shape (2, k,n,n) with ks and -ks on every entry. then summed. 1 means win, 0 means loss
+
+Rank 4: Diagonals of a hypercube
+```
+RANK = 4
+print(convs(RANK=4)[-1].numpy())
+```
+
+Rank N: Diagonals of an N-cube
+```
+RANK = N
+print(convs(RANK=4)[-1].numpy())
+```
