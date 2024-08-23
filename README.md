@@ -10,7 +10,10 @@ Parallelized and generalized implementation of hyperdimensional TicTacToe in pur
 
 BOARD_DIM: Tuple[int] = Dimensions of the board. Can be N-dimensional (ex: [50,50,50,50,50])
 
+RANK: Dimensionality of the board, equal to len(BOARD_DIM)
+
 K: int = Length of line required to win
+
 
 ## Usage
 
@@ -158,11 +161,11 @@ Every win condition above rank 1 (is a diagonal) also has 1 flipped version. For
          [[[0 0 1]
            [0 1 0]
            [1 0 0]]]] # anti-diagonal
-
-         [[[0 0 1]
-           [0 1 0]
-           [1 0 0]]]] # anti-diagonal
 ```
 
+For any given board, the total number of win conditions:
 
-So in total, there are about N * (N choose 2) * 2 win conditions for a Rank N tic tac toe board
+$$\binom{N}{2} \left(\sum_{i=0}^{N-2} 2^i\right)+ 2^{N-1}$$
+
+
+
