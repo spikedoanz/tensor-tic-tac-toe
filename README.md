@@ -1,8 +1,8 @@
 # Tensor Tic Tac Toe
 
-Parallelized and generalized implementation of a hyperdimensional TicTacToe in pure tensor ops
+Parallelized and generalized implementation of hyperdimensional TicTacToe in pure tensor ops
 
-![nazuna](cube.png)
+![nazuna](extras/cube.png)
 
 --- 
 
