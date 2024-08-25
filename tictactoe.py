@@ -3,9 +3,9 @@ from tinygrad import Tensor
 from functools import reduce
 from itertools import combinations
 
-BOARD_DIM = (50,50,50,50)
+BOARD_DIM = [3 for _ in range(4)]
 RANK = len(BOARD_DIM)
-K = 4
+K = 3
 
 def add_axes(x:Tensor, rank:int, shift:int=0):
     """ Adds extra axes around the tensor to turn into rank, shifted by 'shift'.' 
@@ -28,11 +28,12 @@ def kronecker_delta(n:int, rank:int):
 def convs(K=K, RANK=RANK):
     kernels = []
     for local_rank in range(1,RANK+1):
-        kernels.append(pad_axes(add_axes(kronecker_delta(K,local_rank), RANK)))
-        flips = [kernels[-1].flip(r) for r in range(local_rank)]
+        kernel = pad_axes(add_axes(kronecker_delta(K,local_rank), RANK))
+        flips = [kernel.flip(r) for r in range(local_rank)]
         kernels.extend(flips)
         if local_rank != RANK: 
             transpositions = list(combinations(range(RANK), 2))
+            print(transpositions)
             kernels.extend([kernel.transpose(*t) for t in transpositions for kernel in flips])
     ret = [Tensor.rearrange(kernel, '... -> 1 ...') for kernel in kernels]
     return Tensor.stack(*ret, dim=0)
@@ -50,5 +51,7 @@ def check(board:Tensor, kernels:Tensor, specifics:bool=False):
 if __name__ == "__main__":
     board = Tensor.randint(*BOARD_DIM, low=-1, high=2)
     kernels = convs()
+    print(kernels.numpy())
     result = check(board, kernels, True)
     print(board.numpy())
+    print(BOARD_DIM)
